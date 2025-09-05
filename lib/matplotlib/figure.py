@@ -951,6 +951,15 @@ default: %(va)s
             ax.clear()
             self.delaxes(ax)  # Remove ax from self._axstack.
 
+        # Clear figure and axes references from figure-level artists
+        all_figure_artists = (self.artists + self.lines + self.patches + 
+                             self.texts + self.images + self.legends)
+        for artist in all_figure_artists:
+            if hasattr(artist, 'axes'):
+                artist.axes = None
+            if hasattr(artist, 'figure'):
+                artist.figure = None
+
         self.artists = []
         self.lines = []
         self.patches = []

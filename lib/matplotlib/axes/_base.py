@@ -1299,9 +1299,29 @@ class _AxesBase(martist.Artist):
         self._get_patches_for_fill = _process_plot_var_args(self, 'fill')
 
         self._gridOn = mpl.rcParams['axes.grid']
+        
+        # Clear the axes and figure references from all children
         old_children, self._children = self._children, []
         for chld in old_children:
             chld.axes = chld.figure = None
+        
+        # Also clear axes and figure references from artists in containers
+        for container in self.containers:
+            for artist in container.get_children():
+                if hasattr(artist, 'axes'):
+                    artist.axes = None
+                if hasattr(artist, 'figure'):
+                    artist.figure = None
+        
+        # Clear axes and figure references from legend artists
+        if self.legend_ is not None:
+            # Clear references from legend elements
+            for artist in self.legend_.get_children():
+                if hasattr(artist, 'axes'):
+                    artist.axes = None
+                if hasattr(artist, 'figure'):
+                    artist.figure = None
+        
         self._mouseover_set = _OrderedSet()
         self.child_axes = []
         self._current_image = None  # strictly for pyplot via _sci, _gci
