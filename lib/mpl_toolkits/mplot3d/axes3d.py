@@ -440,6 +440,9 @@ class Axes3D(Axes):
             return
         self._unstale_viewLim()
 
+        # Open renderer group for 3D axes, similar to base class
+        renderer.open_group('axes', gid=self.get_gid())
+
         # draw the background patch
         self.patch.draw(renderer)
         self._frameon = False
@@ -487,8 +490,36 @@ class Axes3D(Axes):
             for axis in self._axis_map.values():
                 axis.draw(renderer)
 
-        # Then rest
-        super().draw(renderer)
+        # Handle other artists similar to base class, but without calling super().draw()
+        # to avoid double visibility check and renderer group management
+        artists = self.get_children()
+        artists.remove(self.patch)
+        
+        # Remove axes since we handle them above in 3D way
+        for _axis in self._axis_map.values():
+            if _axis in artists:
+                artists.remove(_axis)
+        
+        # Remove spines if not using frames (3D specific)
+        if not (self.axison and self._frameon):
+            for spine in self.spines.values():
+                if spine in artists:
+                    artists.remove(spine)
+        
+        # Filter animated artists if not saving
+        if not self.figure.canvas.is_saving():
+            artists = [
+                a for a in artists
+                if not a.get_animated() or isinstance(a, mimage.AxesImage)]
+        
+        # Sort by zorder and draw
+        artists = sorted(artists, key=lambda artist: artist.get_zorder())
+        mimage._draw_list_compositing_images(
+            renderer, self, artists, self.figure.suppressComposite)
+
+        # Close the renderer group
+        renderer.close_group('axes')
+        self.stale = False
 
     def get_axis_position(self):
         vals = self.get_w_lims()

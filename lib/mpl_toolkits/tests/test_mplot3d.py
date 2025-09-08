@@ -25,8 +25,13 @@ mpl3d_image_comparison = functools.partial(
 
 @check_figures_equal(extensions=["png"])
 def test_invisible_axes(fig_test, fig_ref):
-    ax = fig_test.subplots(subplot_kw=dict(projection='3d'))
-    ax.set_visible(False)
+    # Test that invisible 3D axes behaves the same as invisible 2D axes
+    ax_test = fig_test.subplots(subplot_kw=dict(projection='3d'))
+    ax_test.set_visible(False)
+    
+    # Reference: regular 2D axes set to invisible
+    ax_ref = fig_ref.subplots()
+    ax_ref.set_visible(False)
 
 
 @mpl3d_image_comparison(['aspects.png'], remove_text=False)
