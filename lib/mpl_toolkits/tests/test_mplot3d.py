@@ -27,6 +27,9 @@ mpl3d_image_comparison = functools.partial(
 def test_invisible_axes(fig_test, fig_ref):
     ax = fig_test.subplots(subplot_kw=dict(projection='3d'))
     ax.set_visible(False)
+    
+    # Reference figure should be empty (no axes drawn)
+    pass  # fig_ref should remain empty with no subplots
 
 
 @mpl3d_image_comparison(['aspects.png'], remove_text=False)
